@@ -103,7 +103,7 @@ export const addContribution = async (todoId, inputText) => {
 
 // Make the DELETE request for "del" route
 export const deleteTodo = async (todoId) => {
-    const token = getAuthToken();
+    const token = localStorage.getItem('authToken');
     if (!token) {
         throw new Error("Authentication token is missing");
     }
@@ -118,7 +118,7 @@ export const deleteTodo = async (todoId) => {
         });
 
         if (!response.ok) {
-            const text = await response.text();
+            const text = await response.text();  // Debug response
             console.error("Error response:", text);
             throw new Error(`Failed to delete todo, Status: ${response.status}`);
         }
