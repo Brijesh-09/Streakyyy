@@ -2,8 +2,11 @@ const API_URL = "https://streaky-backend.onrender.com/todo"; // Adjusted to matc
 
 // Helper function to get the token from localStorage
 const getAuthToken = () => {
-    const token = localStorage.getItem('authToken'); // or wherever you store the token
+    const token = localStorage.getItem('authToken');
     console.log('Token retrieved:', token);  // Log the token
+    if (!token) {
+        console.error('Auth token is missing!');
+    }
     return token;
 };
 
@@ -28,8 +31,8 @@ export const getTodos = async () => {
     }
 
     const data = await response.json();
+    console.log('Fetched todos:', data);
 
-    // Check if data.todos is an array before returning
     if (Array.isArray(data.todos)) {
         return data.todos;
     } else {
@@ -45,7 +48,7 @@ export const addTodo = async (newTask) => {
             throw new Error('Token not found');
         }
 
-        console.log('New task data:', newTask);  // Log new task data to ensure it's correct
+        console.log('New task data:', newTask);
 
         const response = await fetch(`${API_URL}/add`, {
             method: "POST",
@@ -56,20 +59,24 @@ export const addTodo = async (newTask) => {
             body: JSON.stringify(newTask),
         });
 
+        console.log('Raw response:', response);
+
         if (!response.ok) {
-            const errorDetails = await response.json();  // Get error details
-            console.error('Response error details:', errorDetails);
+            const text = await response.text();
+            console.error('Response error details:', text);
             throw new Error(`Failed to add new task, Status: ${response.status}`);
         }
 
-        return await response.json();
+        const data = await response.json();
+        console.log('Response JSON:', data);
+        return data;
     } catch (error) {
         console.error("Error adding new task:", error);
-        throw error;  // Re-throw error to be handled by the calling function
+        throw error;
     }
 };
 
-// Make the POST request for "addcontribution" route
+// Make the POST request for "addContribution" route
 export const addContribution = async (todoId, inputText) => {
     const token = getAuthToken();
     if (!token) {
@@ -96,7 +103,7 @@ export const addContribution = async (todoId, inputText) => {
 
 // Make the DELETE request for "del" route
 export const deleteTodo = async (todoId) => {
-    const token = localStorage.getItem('authToken');
+    const token = getAuthToken();
     if (!token) {
         throw new Error("Authentication token is missing");
     }
@@ -111,7 +118,7 @@ export const deleteTodo = async (todoId) => {
         });
 
         if (!response.ok) {
-            const text = await response.text();  // Debug response
+            const text = await response.text();
             console.error("Error response:", text);
             throw new Error(`Failed to delete todo, Status: ${response.status}`);
         }
@@ -122,4 +129,3 @@ export const deleteTodo = async (todoId) => {
         throw error;
     }
 };
-
